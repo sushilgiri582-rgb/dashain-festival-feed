@@ -17,12 +17,23 @@ import { Footer } from './components/Footer';
 import { StoryDetailModal } from './components/StoryDetailModal';
 import { SubmissionModal } from './components/SubmissionModal';
 import { AdminDashboard } from './components/AdminDashboard';
+import {
+  seedInitialPostsIfEmpty,
+  subscribeToGlobalPosts,
+  createGlobalPost,
+  togglePostLikeInFirestore,
+  incrementPostViewsInFirestore,
+  addCommentToPostInFirestore,
+  setPostApprovalInFirestore,
+  setPostFeaturedInFirestore,
+  deletePostFromFirestore,
+  subscribeToAnnouncement,
+  updateAnnouncementInFirestore,
+  subscribeToSiteAnalytics,
+} from './services/postsService';
 
 const STORAGE_KEYS = {
-  POSTS: 'mero_dashain_posts_v1',
   LIKES: 'mero_dashain_likes_v1',
-  ANALYTICS: 'mero_dashain_analytics_v1',
-  ANNOUNCEMENT: 'mero_dashain_announcement_v1',
   THEME: 'mero_dashain_theme_v1',
   PETALS: 'mero_dashain_petals_v1',
 };
@@ -44,20 +55,10 @@ export default function App() {
   // Ambient Audio
   const [audioPlaying, setAudioPlaying] = useState<boolean>(false);
 
-  // Posts State
-  const [posts, setPosts] = useState<Post[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.POSTS);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return INITIAL_POSTS;
-      }
-    }
-    return INITIAL_POSTS;
-  });
+  // Global Posts from Firestore (starts with initial fallback while connecting)
+  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
 
-  // User's liked post IDs
+  // User's liked post IDs (persisted locally so user knows what they liked)
   const [likedPostIds, setLikedPostIds] = useState<Set<string>>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.LIKES);
     if (saved) {
@@ -71,45 +72,21 @@ export default function App() {
   });
 
   // Analytics State
-  const [analytics, setAnalytics] = useState<SiteAnalytics>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.ANALYTICS);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        return {
-          ...parsed,
-          totalViews: parsed.totalViews + 1, // count this visit
-        };
-      } catch {
-        // fallback
-      }
-    }
-    return {
-      totalViews: 3840,
-      totalLikes: 1450,
-      totalPosts: INITIAL_POSTS.length,
-      uniqueCountries: new Set(INITIAL_POSTS.map((p) => p.country)).size,
-      lastUpdated: new Date().toISOString(),
-    };
+  const [analytics, setAnalytics] = useState<SiteAnalytics>({
+    totalViews: 4250,
+    totalLikes: INITIAL_POSTS.reduce((acc, p) => acc + p.likesCount, 0),
+    totalPosts: INITIAL_POSTS.length,
+    uniqueCountries: new Set(INITIAL_POSTS.map((p) => p.country)).size,
+    lastUpdated: new Date().toISOString(),
   });
 
   // Admin Announcement State
-  const [announcement, setAnnouncement] = useState<AdminAnnouncement | null>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.ANNOUNCEMENT);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        // fallback
-      }
-    }
-    return {
-      id: 'ann-1',
-      title: 'Warmest Vijaya Dashami & Tihar Greetings to Nepalis Worldwide!',
-      content: 'May Goddess Durga Bhavani and Mata Laxmi shower infinite blessings, unity, and radiant joy upon all diaspora families. Let us celebrate our cultural heritage together. — Sushil Giri (Platform Manager)',
-      active: true,
-      date: new Date().toLocaleDateString(),
-    };
+  const [announcement, setAnnouncement] = useState<AdminAnnouncement | null>({
+    id: 'ann-current',
+    title: 'Warmest Vijaya Dashami & Tihar Greetings to Nepalis Worldwide!',
+    content: 'May Goddess Durga Bhavani and Mata Laxmi shower infinite blessings, unity, and radiant joy upon all diaspora families. — Platform Managed by Sushil Giri',
+    active: true,
+    date: new Date().toLocaleDateString(),
   });
 
   // Admin Login Session
@@ -119,6 +96,43 @@ export default function App() {
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+
+  // Real-time Firestore Connection & Subscriptions
+  useEffect(() => {
+    // 1. Seed initial data to Firestore if the cloud database is brand new
+    seedInitialPostsIfEmpty().catch((err) => {
+      console.warn('Initial Firestore seed check:', err);
+    });
+
+    // 2. Real-time subscription to global posts collection
+    const unsubscribePosts = subscribeToGlobalPosts((livePosts) => {
+      if (livePosts.length > 0) {
+        setPosts(livePosts);
+        // Also update selected post if modal is currently open
+        setSelectedPost((prev) => {
+          if (!prev) return null;
+          const updated = livePosts.find((p) => p.id === prev.id);
+          return updated || prev;
+        });
+      }
+    });
+
+    // 3. Real-time subscription to admin announcement
+    const unsubscribeAnnouncements = subscribeToAnnouncement((liveAnn) => {
+      setAnnouncement(liveAnn);
+    });
+
+    // 4. Real-time subscription to site analytics
+    const unsubscribeAnalytics = subscribeToSiteAnalytics((liveStats) => {
+      setAnalytics(liveStats);
+    });
+
+    return () => {
+      unsubscribePosts();
+      unsubscribeAnnouncements();
+      unsubscribeAnalytics();
+    };
+  }, []);
 
   // Sync Dark Mode to DOM
   useEffect(() => {
@@ -135,27 +149,10 @@ export default function App() {
     localStorage.setItem(STORAGE_KEYS.PETALS, String(petalsEnabled));
   }, [petalsEnabled]);
 
-  // Sync Posts to LocalStorage
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
-  }, [posts]);
-
   // Sync Likes
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.LIKES, JSON.stringify(Array.from(likedPostIds)));
   }, [likedPostIds]);
-
-  // Sync Analytics
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.ANALYTICS, JSON.stringify(analytics));
-  }, [analytics]);
-
-  // Sync Announcement
-  useEffect(() => {
-    if (announcement) {
-      localStorage.setItem(STORAGE_KEYS.ANNOUNCEMENT, JSON.stringify(announcement));
-    }
-  }, [announcement]);
 
   // Confetti / Flower shower burst
   const triggerConfetti = () => {
@@ -169,54 +166,43 @@ export default function App() {
     });
   };
 
-  // Toggle Like on Post
-  const handleToggleLike = (postId: string) => {
+  // Toggle Like on Post (syncs to global Firestore)
+  const handleToggleLike = async (postId: string) => {
+    const isAlreadyLiked = likedPostIds.has(postId);
+    const delta = isAlreadyLiked ? -1 : 1;
+
+    // Optimistic local update
     setLikedPostIds((prev) => {
       const next = new Set(prev);
-      const isAlreadyLiked = next.has(postId);
-
-      if (isAlreadyLiked) {
-        next.delete(postId);
-      } else {
-        next.add(postId);
-      }
-
-      // Update post likes counter
-      setPosts((currentPosts) =>
-        currentPosts.map((p) => {
-          if (p.id === postId) {
-            const updated = {
-              ...p,
-              likesCount: isAlreadyLiked ? Math.max(0, p.likesCount - 1) : p.likesCount + 1,
-            };
-            if (selectedPost && selectedPost.id === postId) {
-              setSelectedPost(updated);
-            }
-            return updated;
-          }
-          return p;
-        })
-      );
-
+      if (isAlreadyLiked) next.delete(postId);
+      else next.add(postId);
       return next;
     });
+
+    setPosts((current) =>
+      current.map((p) => (p.id === postId ? { ...p, likesCount: Math.max(0, p.likesCount + delta) } : p))
+    );
+
+    // Save to shared Firestore database
+    try {
+      await togglePostLikeInFirestore(postId, delta);
+    } catch (err) {
+      console.warn('Could not sync like to cloud database:', err);
+    }
   };
 
   // Open Detail View with View Counter increment
   const handleOpenDetail = (post: Post) => {
     setSelectedPost(post);
-    setPosts((currentPosts) =>
-      currentPosts.map((p) => {
-        if (p.id === post.id) {
-          return { ...p, viewsCount: p.viewsCount + 1 };
-        }
-        return p;
-      })
-    );
+    incrementPostViewsInFirestore(post.id);
   };
 
-  // Add Comment / Blessing to Post
-  const handleAddComment = (postId: string, userName: string, country: string, text: string) => {
+  // Add Comment / Blessing to Post (syncs to global Firestore)
+  const handleAddComment = async (postId: string, userName: string, country: string, text: string) => {
+    const targetPost = posts.find((p) => p.id === postId);
+    const existingComments = targetPost?.comments || [];
+
+    // Optimistic local update
     const newComment = {
       id: `c-${Date.now()}`,
       userName,
@@ -225,50 +211,32 @@ export default function App() {
       timestamp: 'Just now',
     };
 
-    setPosts((currentPosts) =>
-      currentPosts.map((p) => {
-        if (p.id === postId) {
-          const updated = {
-            ...p,
-            comments: [newComment, ...p.comments],
-          };
-          if (selectedPost && selectedPost.id === postId) {
-            setSelectedPost(updated);
-          }
-          return updated;
-        }
-        return p;
-      })
+    setPosts((current) =>
+      current.map((p) => (p.id === postId ? { ...p, comments: [newComment, ...p.comments] } : p))
     );
+
+    // Save to shared Firestore database
+    try {
+      await addCommentToPostInFirestore(postId, existingComments, { userName, country, text });
+    } catch (err) {
+      console.warn('Could not sync blessing to cloud database:', err);
+    }
   };
 
-  // Submit New Post from User
-  const handleSubmitPost = (
+  // Submit New Post from User (syncs to global Firestore)
+  const handleSubmitPost = async (
     newPostData: Omit<Post, 'id' | 'timestamp' | 'likesCount' | 'viewsCount' | 'comments' | 'isApproved'>
   ) => {
-    const newPost: Post = {
-      ...newPostData,
-      id: `post-${Date.now()}`,
-      timestamp: 'Just now',
-      likesCount: 1,
-      viewsCount: 1,
-      isApproved: true,
-      comments: [],
-    };
-
-    setPosts((prev) => [newPost, ...prev]);
-
-    // Update analytics
-    setAnalytics((prev) => ({
-      ...prev,
-      totalPosts: prev.totalPosts + 1,
-      uniqueCountries: new Set([...posts.map((p) => p.country), newPost.country]).size,
-    }));
+    try {
+      const createdId = await createGlobalPost(newPostData);
+      console.log('Post published globally to Firestore with ID:', createdId);
+    } catch (err) {
+      console.error('Error saving post to cloud database:', err);
+    }
   };
 
   // Admin Login
   const handleAdminLogin = (pin: string): boolean => {
-    // PIN 9860 or sushilgiri or sushil2026
     const clean = pin.trim().toLowerCase();
     if (clean === '9860' || clean === 'sushilgiri' || clean === 'sushil2026' || clean === '9860228005') {
       setIsAdminLoggedIn(true);
@@ -277,42 +245,40 @@ export default function App() {
     return false;
   };
 
-  // Admin Moderation Actions
-  const handleToggleApprove = (postId: string) => {
-    setPosts((current) =>
-      current.map((p) => (p.id === postId ? { ...p, isApproved: !p.isApproved } : p))
-    );
+  // Admin Moderation Actions (syncs to global Firestore)
+  const handleToggleApprove = async (postId: string) => {
+    const target = posts.find((p) => p.id === postId);
+    if (!target) return;
+    const nextApproved = !target.isApproved;
+
+    setPosts((current) => current.map((p) => (p.id === postId ? { ...p, isApproved: nextApproved } : p)));
+    await setPostApprovalInFirestore(postId, nextApproved);
   };
 
-  const handleToggleFeature = (postId: string) => {
-    setPosts((current) =>
-      current.map((p) => (p.id === postId ? { ...p, isFeatured: !p.isFeatured } : p))
-    );
+  const handleToggleFeature = async (postId: string) => {
+    const target = posts.find((p) => p.id === postId);
+    if (!target) return;
+    const nextFeatured = !target.isFeatured;
+
+    setPosts((current) => current.map((p) => (p.id === postId ? { ...p, isFeatured: nextFeatured } : p)));
+    await setPostFeaturedInFirestore(postId, nextFeatured);
   };
 
-  const handleDeletePost = (postId: string) => {
+  const handleDeletePost = async (postId: string) => {
     setPosts((current) => current.filter((p) => p.id !== postId));
     if (selectedPost?.id === postId) {
       setSelectedPost(null);
     }
+    await deletePostFromFirestore(postId);
   };
 
-  const handleUpdateAnnouncement = (title: string, content: string, active: boolean) => {
-    setAnnouncement({
-      id: `ann-${Date.now()}`,
-      title,
-      content,
-      active,
-      date: new Date().toLocaleDateString(),
-    });
+  const handleUpdateAnnouncement = async (title: string, content: string, active: boolean) => {
+    await updateAnnouncementInFirestore(title, content, active);
   };
 
-  const handleResetSeedData = () => {
-    if (window.confirm('Reset all posts to initial seed entries?')) {
-      setPosts(INITIAL_POSTS);
-      setLikedPostIds(new Set());
-      localStorage.removeItem(STORAGE_KEYS.POSTS);
-      localStorage.removeItem(STORAGE_KEYS.LIKES);
+  const handleResetSeedData = async () => {
+    if (window.confirm('Reset cloud database to default celebration seed entries?')) {
+      await seedInitialPostsIfEmpty();
     }
   };
 

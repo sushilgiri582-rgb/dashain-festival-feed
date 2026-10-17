@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "Post": {
+      "title": "Post",
+      "description": "A public festival celebration story submission from anywhere in the world.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique post identifier" },
+        "userName": { "type": "string", "description": "Submitter full name", "maxLength": 100 },
+        "familyName": { "type": "string", "description": "House or family name", "maxLength": 100 },
+        "country": { "type": "string", "description": "Country of celebration", "maxLength": 80 },
+        "countryCode": { "type": "string", "description": "Country flag or code", "maxLength": 20 },
+        "city": { "type": "string", "description": "City or village of celebration", "maxLength": 100 },
+        "category": { "type": "string", "description": "Festival tradition type", "maxLength": 50 },
+        "title": { "type": "string", "description": "Title of story", "maxLength": 200 },
+        "story": { "type": "string", "description": "Narrative story content", "maxLength": 5000 },
+        "blessings": { "type": "string", "description": "Festival blessing / ashirwad", "maxLength": 500 },
+        "mediaType": { "type": "string", "enum": ["image", "video"] },
+        "mediaUrl": { "type": "string", "description": "Photo/video data URL or link", "maxLength": 2000000 },
+        "mediaAlt": { "type": "string", "description": "Media description", "maxLength": 200 },
+        "timestamp": { "type": "string", "description": "Readable submission timestamp", "maxLength": 60 },
+        "createdAt": { "type": "string", "description": "ISO timestamp of creation" },
+        "likesCount": { "type": "number", "description": "Total heart likes" },
+        "viewsCount": { "type": "number", "description": "Total impressions" },
+        "isFeatured": { "type": "boolean", "description": "Pinned to top" },
+        "isApproved": { "type": "boolean", "description": "Approved for public feed" }
+      },
+      "required": ["userName", "country", "city", "title", "story", "category", "isApproved"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "A festival blessing or comment left on a post.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Comment ID" },
+        "userName": { "type": "string", "description": "Commenter name", "maxLength": 100 },
+        "country": { "type": "string", "description": "Commenter location", "maxLength": 80 },
+        "text": { "type": "string", "description": "Blessing message text", "maxLength": 1000 },
+        "timestamp": { "type": "string", "description": "Readable timestamp", "maxLength": 60 },
+        "createdAt": { "type": "string", "description": "ISO timestamp" }
+      },
+      "required": ["userName", "text"]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Official broadcast announcement banner from admin.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Announcement ID" },
+        "title": { "type": "string", "description": "Banner title", "maxLength": 200 },
+        "content": { "type": "string", "description": "Banner message content", "maxLength": 1000 },
+        "active": { "type": "boolean", "description": "Whether banner is visible" },
+        "date": { "type": "string", "description": "Date of announcement", "maxLength": 50 }
+      },
+      "required": ["title", "content", "active"]
+    },
+    "Analytics": {
+      "title": "Analytics",
+      "description": "Global aggregated view and like counters.",
+      "type": "object",
+      "properties": {
+        "totalViews": { "type": "number", "description": "Total site views" },
+        "totalLikes": { "type": "number", "description": "Total community likes" },
+        "totalPosts": { "type": "number", "description": "Total posts count" }
+      }
+    }
+  },
+  "firestore": {
+    "/posts/{postId}": {
+      "schema": { "$ref": "#/entities/Post" },
+      "description": "Public community festival celebration posts."
+    },
+    "/posts/{postId}/comments/{commentId}": {
+      "schema": { "$ref": "#/entities/Comment" },
+      "description": "Community blessings and well-wishes for a specific post."
+    },
+    "/announcements/{announcementId}": {
+      "schema": { "$ref": "#/entities/Announcement" },
+      "description": "Broadcast announcement banners managed by admin."
+    },
+    "/analytics/site": {
+      "schema": { "$ref": "#/entities/Analytics" },
+      "description": "Site-wide aggregated view and interaction counters."
+    }
+  }
+}
