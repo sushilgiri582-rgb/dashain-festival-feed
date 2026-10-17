@@ -3,24 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function isValidId(id) {
-      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
-    }
-
-    function isValidPost(data) {
-      return data.keys().hasAll(['userName', 'country', 'city', 'title', 'story', 'category', 'isApproved']) &&
-             data.userName is string && data.userName.size() <= 100 &&
-             data.country is string && data.country.size() <= 80 &&
-             data.city is string && data.city.size() <= 100 &&
-             data.title is string && data.title.size() <= 200 &&
-             data.story is string && data.story.size() <= 10000 &&
-             data.category is string && data.category.size() <= 50 &&
-             data.isApproved is bool;
-    }
-
-    function isValidComment(data) {
-      return data.keys().hasAll(['userName', 'text']) &&
-             data.userName is string && data.userName.size() <= 100 &&
-             data.text is string && data.text.size() <= 1500;
+      return id is string && id.size() <= 128;
     }
 
     // Default deny catch-all
@@ -28,27 +11,17 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Community Posts
+    // Community Posts - Shared Global Feed
     match /posts/{postId} {
       allow read: if true;
-      allow create: if isValidId(postId) && isValidPost(request.resource.data);
-      allow update: if isValidId(postId) && (
-        // Community liking or viewing updates
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount']) ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewsCount']) ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount', 'viewsCount']) ||
-        // Admin moderation updates
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isApproved']) ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isFeatured']) ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isApproved', 'isFeatured'])
-      );
+      allow create: if isValidId(postId);
+      allow update: if isValidId(postId);
       allow delete: if isValidId(postId);
 
-      // Comments subcollection
+      // Comments & blessings subcollection
       match /comments/{commentId} {
         allow read: if true;
-        allow create: if isValidId(commentId) && isValidComment(request.resource.data);
-        allow delete: if isValidId(commentId);
+        allow create, update, delete: if isValidId(commentId);
       }
     }
 
@@ -58,7 +31,7 @@ service cloud.firestore {
       allow write: if isValidId(announcementId);
     }
 
-    // Site Analytics
+    // Site Analytics & Counters
     match /analytics/{docId} {
       allow read: if true;
       allow write: if isValidId(docId);

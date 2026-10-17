@@ -101,13 +101,18 @@ export const FestiveHero: React.FC<FestiveHeroProps> = ({
               </a>
             </div>
 
-            {/* Managed by Sushil Giri Attribution Notice */}
-            <div className="mt-6 pt-5 border-t border-amber-900/10 dark:border-stone-800 flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400">
-              <span className="font-medium text-stone-800 dark:text-stone-200">Platform Managed by Sushil Giri</span>
+            {/* Managed by Sushil Giri Attribution & Real-time Cloud Status */}
+            <div className="mt-6 pt-5 border-t border-amber-900/10 dark:border-stone-800 flex flex-wrap items-center gap-2 text-xs text-stone-500 dark:text-stone-400">
+              <span className="font-semibold text-stone-900 dark:text-stone-100">Platform Managed by Sushil Giri</span>
               <span>·</span>
-              <span>WhatsApp: +977 9860228005</span>
+              <a href="https://wa.me/9779860228005" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors">
+                WhatsApp: +977 9860228005
+              </a>
               <span>·</span>
-              <span>Free Community Initiative</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100/90 dark:bg-emerald-950/80 px-2.5 py-0.5 text-[11px] font-medium text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Global Cloud Backend: Real-Time Synced for All Visitors</span>
+              </span>
             </div>
 
           </div>

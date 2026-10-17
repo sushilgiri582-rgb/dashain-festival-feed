@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { X, Upload, Image, ArrowRight, ArrowLeft, Check, Sparkles } from 'lucide-react';
+import { X, Upload, ArrowRight, ArrowLeft, Sparkles, Loader2 } from 'lucide-react';
 import { Post, FestivalCategory } from '../types';
 import { COUNTRIES_LIST } from '../data/seedData';
 import { FESTIVE_ARTWORKS } from '../utils/festiveArtworks';
+import { compressImageFile } from '../utils/imageCompressor';
 
 interface SubmissionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmitPost: (newPost: Omit<Post, 'id' | 'timestamp' | 'likesCount' | 'viewsCount' | 'comments' | 'isApproved'>) => void;
+  onSubmitPost: (newPost: Omit<Post, 'id' | 'timestamp' | 'likesCount' | 'viewsCount' | 'comments' | 'isApproved'>) => Promise<void> | void;
   onTriggerConfetti: () => void;
 }
 
@@ -27,6 +28,8 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
   onTriggerConfetti,
 }) => {
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   
   // Form State
   const [userName, setUserName] = useState('');
@@ -52,7 +55,7 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -62,14 +65,17 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
       setMediaType('image');
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (typeof event.target?.result === 'string') {
-        setMediaUrl(event.target.result);
-        setCustomFileLoaded(true);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      setIsCompressing(true);
+      // Automatically optimize camera images for cloud storage (< 100KB)
+      const compressedDataUrl = await compressImageFile(file, 900, 900);
+      setMediaUrl(compressedDataUrl);
+      setCustomFileLoaded(true);
+    } catch (err) {
+      console.warn('Image processing fallback:', err);
+    } finally {
+      setIsCompressing(false);
+    }
   };
 
   const handleSelectPresetArt = (art: string) => {
@@ -77,36 +83,44 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
     setCustomFileLoaded(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userName || !city || !title || !story) return;
 
-    onSubmitPost({
-      userName: userName.trim(),
-      familyName: familyName.trim() || `${userName.trim()} Family`,
-      country,
-      countryCode,
-      city: city.trim(),
-      category,
-      title: title.trim(),
-      story: story.trim(),
-      blessings: blessings.trim() || 'Wishing happiness, peace, and prosperity to everyone worldwide!',
-      mediaType,
-      mediaUrl,
-      mediaAlt: title.trim(),
-      isFeatured: false,
-    });
+    setIsSubmitting(true);
+    try {
+      await onSubmitPost({
+        userName: userName.trim(),
+        familyName: familyName.trim() || `${userName.trim()} Family`,
+        country,
+        countryCode,
+        city: city.trim(),
+        category,
+        title: title.trim(),
+        story: story.trim(),
+        blessings: blessings.trim() || 'Wishing happiness, peace, and prosperity to everyone worldwide!',
+        mediaType,
+        mediaUrl,
+        mediaAlt: title.trim(),
+        isFeatured: false,
+      });
 
-    onTriggerConfetti();
-    onClose();
-    // Reset form
-    setStep(1);
-    setUserName('');
-    setFamilyName('');
-    setCity('');
-    setTitle('');
-    setStory('');
-    setBlessings('');
+      onTriggerConfetti();
+      onClose();
+      // Reset form
+      setStep(1);
+      setUserName('');
+      setFamilyName('');
+      setCity('');
+      setTitle('');
+      setStory('');
+      setBlessings('');
+      setCustomFileLoaded(false);
+    } catch (error) {
+      console.error('Failed to submit post:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -114,7 +128,7 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
+        onClick={() => !isSubmitting && onClose()}
         aria-hidden="true"
       />
 
@@ -124,17 +138,23 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
         {/* Top Header */}
         <div className="flex items-center justify-between border-b border-stone-100 px-6 py-4 dark:border-stone-800">
           <div>
-            <h2 className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-stone-900 dark:text-stone-50">
-              Share Your Dashain & Tihar Celebration
-            </h2>
-            <div className="text-xs text-stone-500 dark:text-stone-400">
-              Step {step} of 4 · Global Community Feed
+            <div className="flex items-center gap-2">
+              <h2 className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-stone-900 dark:text-stone-50">
+                Share Your Dashain & Tihar Celebration
+              </h2>
+              <span className="hidden sm:inline-flex items-center gap-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                ☁️ Live Cloud Sync
+              </span>
+            </div>
+            <div className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+              Step {step} of 4 · Saved instantly to Global Cloud Database for all worldwide visitors
             </div>
           </div>
           <button
             type="button"
+            disabled={isSubmitting}
             onClick={onClose}
-            className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-200"
+            className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-200 disabled:opacity-40"
           >
             <X className="h-5 w-5" />
           </button>
@@ -159,7 +179,7 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
                   1. Tell us who is celebrating
                 </h3>
                 <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                  Your name and family house will appear proudly on the community wall.
+                  Your name and family house will appear proudly on the global community wall.
                 </p>
               </div>
 
@@ -191,7 +211,7 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
               </div>
 
               <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 border border-amber-200 dark:border-amber-900/60">
-                ✨ Tip: Whether you are in your ancestral home in Nepal or celebrating across the globe, your celebration connects our worldwide community.
+                ✨ Tip: Your post will be permanently saved to our shared cloud database and immediately visible to families across Nepal and worldwide.
               </div>
             </div>
           )}
@@ -285,23 +305,35 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
               {/* Photo Upload Zone */}
               <div>
                 <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">
-                  Upload Your Festival Media
+                  Upload Your Festival Media (Optimized for Instant Cloud Upload)
                 </label>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-4">
                   <label className="flex h-32 w-full sm:w-1/2 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-stone-300 hover:border-amber-500 dark:border-stone-700 dark:hover:border-amber-500 bg-stone-50 hover:bg-amber-50/50 dark:bg-stone-950 transition-colors p-4 text-center">
-                    <Upload className="h-6 w-6 text-stone-400 group-hover:text-amber-600 mb-1" />
-                    <span className="text-xs font-semibold text-stone-700 dark:text-stone-300">
-                      Click to Browse File
-                    </span>
-                    <span className="text-[11px] text-stone-400 mt-0.5">
-                      JPG, PNG, WebP or MP4
-                    </span>
+                    {isCompressing ? (
+                      <div className="flex flex-col items-center">
+                        <Loader2 className="h-6 w-6 text-amber-600 animate-spin mb-1" />
+                        <span className="text-xs font-semibold text-stone-700 dark:text-stone-300">
+                          Optimizing image for cloud...
+                        </span>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="h-6 w-6 text-stone-400 group-hover:text-amber-600 mb-1" />
+                        <span className="text-xs font-semibold text-stone-700 dark:text-stone-300">
+                          Click to Browse File
+                        </span>
+                        <span className="text-[11px] text-stone-400 mt-0.5">
+                          Photos auto-compressed for lightning speed
+                        </span>
+                      </>
+                    )}
                     <input
                       type="file"
                       accept="image/*,video/*"
                       onChange={handleFileUpload}
                       className="hidden"
+                      disabled={isCompressing}
                     />
                   </label>
 
@@ -314,7 +346,7 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute bottom-1 right-1 rounded bg-black/70 px-2 py-0.5 text-[10px] text-white">
-                      {customFileLoaded ? 'Your Upload' : 'Selected Artwork'}
+                      {customFileLoaded ? 'Your Upload (Ready)' : 'Selected Artwork'}
                     </div>
                   </div>
                 </div>
@@ -406,8 +438,9 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
             {step > 1 ? (
               <button
                 type="button"
+                disabled={isSubmitting}
                 onClick={() => setStep(step - 1)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800 disabled:opacity-40"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 <span>Back</span>
@@ -433,11 +466,20 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
             ) : (
               <button
                 type="submit"
-                disabled={!title.trim() || !story.trim()}
-                className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 via-amber-600 to-amber-500 px-6 py-2.5 text-xs font-semibold text-white shadow-md hover:brightness-105 disabled:opacity-40 transition-all"
+                disabled={!title.trim() || !story.trim() || isSubmitting}
+                className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 via-amber-600 to-amber-500 px-6 py-2.5 text-xs font-semibold text-white shadow-md hover:brightness-105 disabled:opacity-50 transition-all cursor-pointer"
               >
-                <Sparkles className="h-4 w-4" />
-                <span>Publish to Global Feed</span>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Saving to Global Database...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    <span>Publish Globally</span>
+                  </>
+                )}
               </button>
             )}
           </div>
