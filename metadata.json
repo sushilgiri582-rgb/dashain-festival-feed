@@ -1,0 +1,6 @@
+{
+  "name": "Mero Dashain & Tihar Global Feed",
+  "description": "Ultra-luxurious, stunning worldwide festival celebration feed connecting Nepali families globally with stories, Sayapatri memories, Jamara blessings, and glowing Tihar lights.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
