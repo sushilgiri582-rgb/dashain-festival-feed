@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Sparkles } from 'lucide-react';
+import { Search, Sparkles, Video, Film } from 'lucide-react';
 import { Post } from '../types';
 import { StoryCard } from './StoryCard';
 import { COUNTRIES_LIST } from '../data/seedData';
@@ -16,7 +16,7 @@ interface CommunityFeedProps {
   language: Language;
 }
 
-type FilterTab = 'all' | 'dashain' | 'tihar' | 'bhai_tika' | 'deusi' | 'diaspora';
+type FilterTab = 'all' | 'video' | 'dashain' | 'tihar' | 'bhai_tika' | 'deusi' | 'diaspora';
 
 export const CommunityFeed: React.FC<CommunityFeedProps> = ({
   posts,
@@ -39,7 +39,9 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
       if (!post.isApproved) return false;
 
       // Filter Tab
-      if (activeTab === 'dashain') {
+      if (activeTab === 'video') {
+        if (post.mediaType !== 'video') return false;
+      } else if (activeTab === 'dashain') {
         if (post.category !== 'dashain_tika' && post.category !== 'jamara_ghatasthapana') return false;
       } else if (activeTab === 'tihar') {
         if (post.category !== 'tihar_lights') return false;
@@ -79,6 +81,8 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
       return 0;
     });
   }, [posts, activeTab, selectedCountry, searchQuery, sortBy]);
+
+  const videoPostsCount = posts.filter((p) => p.isApproved && p.mediaType === 'video').length;
 
   return (
     <section id="feed-section" className="py-12 border-t border-amber-900/10 dark:border-stone-800">
@@ -123,6 +127,23 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
               }`}
             >
               {t.feedTabAll} ({posts.length})
+            </button>
+
+            {/* Prominent Video Celebrations Tab */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('video')}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+                activeTab === 'video'
+                  ? 'bg-red-600 text-white shadow-xs font-bold ring-2 ring-red-400/50'
+                  : 'bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-900/50'
+              }`}
+            >
+              <Film className="h-3.5 w-3.5" />
+              <span>{t.feedTabVideo}</span>
+              <span className="rounded-full bg-red-600/20 dark:bg-red-900/60 px-1.5 py-0.2 text-[10px] font-bold">
+                {videoPostsCount}
+              </span>
             </button>
 
             <button
@@ -238,6 +259,37 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
           </div>
 
         </div>
+
+        {/* Video Feed Spotlight Banner */}
+        {activeTab === 'video' && (
+          <div className="mb-8 overflow-hidden rounded-2xl border border-red-300/80 bg-gradient-to-r from-red-600/10 via-amber-500/10 to-orange-500/10 p-5 sm:p-6 shadow-sm dark:border-red-900/60 dark:bg-stone-900">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3.5">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-red-600 to-amber-600 text-white shadow-md">
+                  <Video className="h-5 w-5 animate-pulse" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-['Playfair_Display',Georgia,serif] text-base sm:text-lg font-bold text-stone-900 dark:text-stone-50">
+                      {t.videoReelTitle}
+                    </h3>
+                    <span className="rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                      LIVE
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-xs sm:text-sm text-stone-600 dark:text-stone-300">
+                    {t.videoReelSubtitle}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 rounded-xl bg-white/80 dark:bg-stone-800/80 px-3.5 py-2 text-xs font-bold text-amber-950 dark:text-amber-200 border border-amber-300/60 dark:border-stone-700 shadow-2xs shrink-0">
+                <span className="text-base">🎵</span>
+                <span>{t.videoPlayingTheme}</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Stories Grid */}
         {filteredPosts.length > 0 ? (

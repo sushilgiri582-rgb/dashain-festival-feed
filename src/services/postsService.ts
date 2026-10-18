@@ -61,6 +61,27 @@ export async function seedInitialPostsIfEmpty(): Promise<void> {
 
       await batch.commit();
       console.log('Initial seed completed successfully in Firestore.');
+    } else {
+      // Ensure video posts exist in Firestore so global visitors see videos immediately
+      const hasVideos = snapshot.docs.some((d) => d.data().mediaType === 'video');
+      if (!hasVideos) {
+        console.log('Seeding featured video celebration posts to Firestore...');
+        const batch = writeBatch(db);
+        for (const post of INITIAL_POSTS) {
+          if (post.mediaType === 'video') {
+            const postDoc = doc(db, POSTS_COLLECTION, post.id);
+            batch.set(
+              postDoc,
+              {
+                ...post,
+                createdAt: new Date().toISOString(),
+              },
+              { merge: true }
+            );
+          }
+        }
+        await batch.commit();
+      }
     }
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, POSTS_COLLECTION);

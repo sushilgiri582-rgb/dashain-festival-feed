@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Share2, Check } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Check, Play, Video } from 'lucide-react';
 import { Post } from '../types';
 import { Translations, Language, CATEGORY_NAMES_NEPALI } from '../i18n/translations';
 
@@ -57,10 +57,20 @@ export const StoryCard: React.FC<StoryCardProps> = ({
       ? CATEGORY_NAMES_NEPALI[post.category] || post.category
       : CATEGORY_NAMES_ENGLISH[post.category] || post.category;
 
+  const isVideo = post.mediaType === 'video';
+  const audioThemeName =
+    post.category === 'tihar_lights' || post.category === 'bhai_tika' || post.category === 'deusi_bhailo'
+      ? (language === 'ne' ? 'देउसी-भैलो धुन' : 'Deusi-Bhailo Dhun')
+      : (language === 'ne' ? 'मालश्री धुन' : 'Malshree Dhun');
+
   return (
     <article
       onClick={() => onOpenDetail(post)}
-      className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-amber-400 hover:shadow-xl dark:border-stone-800 dark:bg-stone-900 cursor-pointer"
+      className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-white shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-stone-900 cursor-pointer ${
+        isVideo
+          ? 'border-red-300/80 hover:border-red-500 ring-1 ring-red-400/20 dark:border-red-900/60'
+          : 'border-stone-200/90 hover:border-amber-400 dark:border-stone-800'
+      }`}
       id={`story-${post.id}`}
     >
       <div>
@@ -80,7 +90,7 @@ export const StoryCard: React.FC<StoryCardProps> = ({
           />
 
           {/* Scrim Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-85" />
 
           {/* Location indicator in top-left */}
           <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-lg bg-black/60 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-md">
@@ -88,9 +98,32 @@ export const StoryCard: React.FC<StoryCardProps> = ({
             <span>{post.city}</span>
           </div>
 
-          {/* Festival type on bottom-left */}
-          <div className="absolute bottom-3 left-3 text-xs font-semibold text-amber-200 drop-shadow-sm">
-            {categoryLabel}
+          {/* Video Indicator Badge in top-right */}
+          {isVideo && (
+            <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-lg bg-red-600/95 px-2.5 py-1 text-xs font-bold text-white shadow-md backdrop-blur-md">
+              <Video className="h-3.5 w-3.5 animate-pulse" />
+              <span>{t.videoFeedBadge}</span>
+            </div>
+          )}
+
+          {/* Play Icon Centered for Video Posts */}
+          {isVideo && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600/90 text-white shadow-lg ring-4 ring-white/30 backdrop-blur-xs transition-transform duration-300 group-hover:scale-115">
+                <Play className="h-5 w-5 fill-current ml-0.5" />
+              </div>
+            </div>
+          )}
+
+          {/* Festival type & Audio Track on bottom */}
+          <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs font-semibold text-amber-200 drop-shadow-sm">
+            <span>{categoryLabel}</span>
+            {isVideo && (
+              <span className="flex items-center gap-1 rounded-md bg-black/60 px-2 py-0.5 text-[11px] text-amber-300 backdrop-blur-xs font-mono">
+                <span>🎵</span>
+                <span>{audioThemeName}</span>
+              </span>
+            )}
           </div>
         </div>
 

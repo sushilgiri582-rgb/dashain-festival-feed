@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, Heart, MessageCircle, Share2, MapPin, Send, Check } from 'lucide-react';
+import { X, Heart, MessageCircle, Share2, MapPin, Send, Check, Video } from 'lucide-react';
 import { Post } from '../types';
 import { Translations, Language } from '../i18n/translations';
+import { FestiveAudioControlBar } from './FestiveAudioControlBar';
+import { festiveAudio } from '../utils/festiveAudio';
 
 interface StoryDetailModalProps {
   post: Post | null;
@@ -28,6 +30,24 @@ export const StoryDetailModal: React.FC<StoryDetailModalProps> = ({
   const [commentCountry, setCommentCountry] = useState(language === 'ne' ? '🇳🇵 नेपाल' : '🇳🇵 Nepal');
   const [commentText, setCommentText] = useState('');
   const [copied, setCopied] = useState(false);
+
+  const isVideo = post?.mediaType === 'video';
+  const isTihar = post?.category === 'tihar_lights' || post?.category === 'bhai_tika' || post?.category === 'deusi_bhailo';
+
+  // Automatically play traditional Nepali festive background audio whenever a video post is viewed
+  useEffect(() => {
+    if (post && post.mediaType === 'video') {
+      const targetTrack = isTihar ? 'deusi' : 'malshree';
+      festiveAudio.playTrack(targetTrack);
+    }
+
+    return () => {
+      // Pause when leaving modal if it was a video
+      if (post && post.mediaType === 'video') {
+        festiveAudio.stop();
+      }
+    };
+  }, [post?.id, post?.mediaType, isTihar]);
 
   useEffect(() => {
     setCommentCountry(language === 'ne' ? '🇳🇵 नेपाल' : '🇳🇵 Nepal');
@@ -85,6 +105,12 @@ export const StoryDetailModal: React.FC<StoryDetailModalProps> = ({
               <MapPin className="h-3 w-3" />
               {post.countryCode} {post.city}, {post.country}
             </span>
+            {isVideo && (
+              <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
+                <Video className="h-3 w-3" />
+                <span>{t.videoFeedBadge}</span>
+              </span>
+            )}
           </div>
 
           <button
@@ -100,15 +126,52 @@ export const StoryDetailModal: React.FC<StoryDetailModalProps> = ({
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6">
           
-          {/* Media */}
-          <div className="overflow-hidden rounded-xl bg-stone-950 aspect-[16/10] max-h-[380px] w-full relative mb-6">
-            <img
-              src={post.mediaUrl}
-              alt={post.mediaAlt || post.title}
-              className="h-full w-full object-cover"
-              referrerPolicy="no-referrer"
-            />
-          </div>
+          {/* Media Player: Interactive Video or Image */}
+          {isVideo ? (
+            <div className="space-y-4 mb-6">
+              <div className="relative overflow-hidden rounded-2xl bg-black aspect-video max-h-[420px] w-full shadow-xl border border-stone-800">
+                <video
+                  src={post.mediaUrl}
+                  poster={post.mediaAlt || undefined}
+                  controls
+                  autoPlay
+                  loop
+                  playsInline
+                  className="h-full w-full object-contain"
+                  ref={(el) => {
+                    if (el) {
+                      el.volume = 1.0; // High volume clarity
+                    }
+                  }}
+                  onError={(e) => {
+                    // Fallback to decorative visual if external video fails
+                    console.log('Video element fallback to interactive frame');
+                  }}
+                >
+                  <source src={post.mediaUrl} type="video/mp4" />
+                  <source src={post.mediaUrl} type="video/webm" />
+                  Your browser does not support HTML5 video.
+                </video>
+              </div>
+
+              {/* Prominent Background Audio Control Bar with Malshree / Deusi-Bhailo tunes */}
+              <FestiveAudioControlBar
+                t={t}
+                language={language}
+                defaultTrack={isTihar ? 'deusi' : 'malshree'}
+                autoPlay={true}
+              />
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-xl bg-stone-950 aspect-[16/10] max-h-[380px] w-full relative mb-6">
+              <img
+                src={post.mediaUrl}
+                alt={post.mediaAlt || post.title}
+                className="h-full w-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+          )}
 
           {/* Title */}
           <h2 className="font-['Playfair_Display',Georgia,serif] text-2xl font-bold text-stone-900 dark:text-stone-50 sm:text-3xl">

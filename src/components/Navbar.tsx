@@ -34,6 +34,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   onTriggerConfetti,
   isAdminLoggedIn,
 }) => {
+  // Sync with audio engine state changes
+  React.useEffect(() => {
+    const unsub = festiveAudio.subscribe(() => {
+      setAudioPlaying(festiveAudio.isPlayingTrack());
+    });
+    return unsub;
+  }, [setAudioPlaying]);
+
   const toggleAudio = () => {
     const isNowPlaying = festiveAudio.toggle();
     setAudioPlaying(isNowPlaying);

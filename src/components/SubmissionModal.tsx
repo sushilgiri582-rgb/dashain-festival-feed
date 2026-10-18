@@ -66,10 +66,18 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
 
     if (file.type.startsWith('video/')) {
       setMediaType('video');
-    } else {
-      setMediaType('image');
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setMediaUrl(event.target.result as string);
+          setCustomFileLoaded(true);
+        }
+      };
+      reader.readAsDataURL(file);
+      return;
     }
 
+    setMediaType('image');
     try {
       setIsCompressing(true);
       const compressedDataUrl = await compressImageFile(file, 900, 900);
@@ -83,6 +91,7 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
   };
 
   const handleSelectPresetArt = (art: string) => {
+    setMediaType('image');
     setMediaUrl(art);
     setCustomFileLoaded(false);
   };
@@ -346,16 +355,56 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
 
                   {/* Preview Container */}
                   <div className="relative h-32 w-full sm:w-1/2 overflow-hidden rounded-xl border border-stone-200 bg-stone-950 dark:border-stone-800">
-                    <img
-                      src={mediaUrl}
-                      alt="Celebration Preview"
-                      className="h-full w-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
+                    {mediaType === 'video' ? (
+                      <video
+                        src={mediaUrl}
+                        controls
+                        autoPlay
+                        loop
+                        playsInline
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <img
+                        src={mediaUrl}
+                        alt="Celebration Preview"
+                        className="h-full w-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    )}
                     <div className="absolute bottom-1 right-1 rounded bg-black/70 px-2 py-0.5 text-[10px] text-white">
-                      {customFileLoaded ? t.submitReadyUpload : t.submitSelectedArtwork}
+                      {customFileLoaded ? (mediaType === 'video' ? '🎥 Video' : t.submitReadyUpload) : t.submitSelectedArtwork}
                     </div>
                   </div>
+                </div>
+
+                {/* Video Clip Preset Quick Option */}
+                <div className="mt-2.5 flex items-center gap-2">
+                  <span className="text-[11px] text-stone-500 dark:text-stone-400">
+                    {language === 'ne' ? 'वा भिडियो क्लिप छान्नुहोस्:' : 'Or pick festive video clip:'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMediaType('video');
+                      setMediaUrl('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4');
+                      setCustomFileLoaded(true);
+                    }}
+                    className="rounded-lg border border-red-300 bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-700 hover:bg-red-100 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300 cursor-pointer"
+                  >
+                    🎥 {language === 'ne' ? 'मालश्री भिडियो' : 'Malshree Video'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMediaType('video');
+                      setMediaUrl('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4');
+                      setCustomFileLoaded(true);
+                    }}
+                    className="rounded-lg border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300 cursor-pointer"
+                  >
+                    🪔 {language === 'ne' ? 'देउसी भिडियो' : 'Deusi Video'}
+                  </button>
                 </div>
 
                 {/* Preset Art Alternatives */}

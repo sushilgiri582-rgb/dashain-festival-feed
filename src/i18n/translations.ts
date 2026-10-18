@@ -47,11 +47,22 @@ export interface Translations {
   feedSectionSubtitle: string;
   feedAddStoryBtn: string;
   feedTabAll: string;
+  feedTabVideo: string;
   feedTabDashain: string;
   feedTabTihar: string;
   feedTabBhaiTika: string;
   feedTabDeusi: string;
   feedTabDiaspora: string;
+  videoFeedBadge: string;
+  videoPlayingTheme: string;
+  audioMalshreeTrack: string;
+  audioDeusiTrack: string;
+  audioTempleTrack: string;
+  audioRoyaltyFreeBadge: string;
+  audioVolumeLabel: string;
+  audioLoudClarityNote: string;
+  videoReelTitle: string;
+  videoReelSubtitle: string;
   feedSearchPlaceholder: string;
   feedClearSearch: string;
   feedAllCountries: string;
@@ -237,11 +248,22 @@ export const translations: Record<Language, Translations> = {
     feedSectionSubtitle: 'Explore authentic moments from Nepali families in Nepal and worldwide.',
     feedAddStoryBtn: 'Add Your Family Story',
     feedTabAll: 'All Stories',
+    feedTabVideo: '🎥 Video Feed',
     feedTabDashain: '🌾 Dashain Tika & Jamara',
     feedTabTihar: '🪔 Tihar Lights & Diyas',
     feedTabBhaiTika: '🌈 Bhai Tika',
     feedTabDeusi: '🪕 Deusi Bhailo',
     feedTabDiaspora: '🌍 Diaspora Worldwide',
+    videoFeedBadge: 'Live Festive Video',
+    videoPlayingTheme: 'Festive Audio Track Playing Automatically',
+    audioMalshreeTrack: '🌾 Malshree Dhun (Dashain Theme)',
+    audioDeusiTrack: '🪔 Deusi-Bhailo (Tihar Theme)',
+    audioTempleTrack: '🔔 Temple Aarti & Chimes',
+    audioRoyaltyFreeBadge: '100% Royalty-Free & Copyright-Free Traditional Festive Audio',
+    audioVolumeLabel: 'Festive Audio Volume',
+    audioLoudClarityNote: 'Enhanced Clarity & Loud Immersive Playback',
+    videoReelTitle: 'Featured Video Celebrations',
+    videoReelSubtitle: 'Watch live Dashain & Tihar moments with synchronized traditional Nepali music.',
     feedSearchPlaceholder: 'Search by family name, city, country, or tradition...',
     feedClearSearch: 'Clear',
     feedAllCountries: '🌍 All Countries',
@@ -420,11 +442,22 @@ export const translations: Record<Language, Translations> = {
     feedSectionSubtitle: 'नेपाल र विश्वका विभिन्न देशहरूबाट नेपाली परिवारहरूका आत्मीय सांस्कृतिक क्षणहरू।',
     feedAddStoryBtn: 'नयाँ कथा थप्नुहोस्',
     feedTabAll: 'सबै कथाहरू',
+    feedTabVideo: '🎥 भिडियो उत्सव',
     feedTabDashain: '🌾 दसैँ टीका र जमरा',
     feedTabTihar: '🪔 तिहारका बत्ती र दियो',
     feedTabBhaiTika: '🌈 पावन भाइटीका',
     feedTabDeusi: '🪕 देउसी-भैलो परम्परा',
     feedTabDiaspora: '🌍 परदेशबाट डायस्पोरा',
+    videoFeedBadge: 'प्रत्यक्ष चाडपर्व भिडियो',
+    videoPlayingTheme: 'चाडपर्व धुन स्वतः बजिरहेको छ',
+    audioMalshreeTrack: '🌾 दसैँ मालश्री धुन (बाँसुरी र सितार)',
+    audioDeusiTrack: '🪔 तिहार देउसी-भैलो धुन (मादल र बाँसुरी)',
+    audioTempleTrack: '🔔 मन्दिर आरती र पवित्र घण्ट',
+    audioRoyaltyFreeBadge: '१००% प्रतिलिपि अधिकार-रहित मौलिक चाडपर्व संगीत',
+    audioVolumeLabel: 'चाडपर्व धुनको ध्वनि (भोल्युम)',
+    audioLoudClarityNote: 'उच्च स्पष्टता तथा चर्को र जीवन्त ध्वनि प्रणाली',
+    videoReelTitle: 'विशेष चाडपर्व भिडियो उत्सव',
+    videoReelSubtitle: 'मौलिक नेपाली चाडपर्व धुनका साथ दसैँ र तिहारका मनमोहक भिडियो क्षणहरू हेर्नुहोस्।',
     feedSearchPlaceholder: 'परिवारको नाम, सहर, देश वा चाडपर्व अनुसार खोज्नुहोस्...',
     feedClearSearch: 'हटाउनुहोस्',
     feedAllCountries: '🌍 सबै देशहरू',

@@ -26,6 +26,100 @@ export const COUNTRIES_LIST = [
 
 export const INITIAL_POSTS: Post[] = [
   {
+    id: 'post-vid-1',
+    userName: 'Suraj Gurung & Patan Ensemble',
+    familyName: 'Gurung Music Gharana',
+    country: 'Nepal',
+    countryCode: '🇳🇵',
+    city: 'Lalitpur (Patan Durbar)',
+    category: 'dashain_tika',
+    title: 'Live Malshree Dhun & Sitar Session in Ancient Patan Courtyard',
+    story: 'Experience the sacred instrumental reverberation of Malshree Dhun performed live with authentic bamboo Bansuri, Sitar, and rhythmic Madal in front of Krishna Mandir. As the autumn breeze drifts through the historic durbar, the divine vibrations welcome Dashain into the hearts of all Nepalis globally.',
+    blessings: 'May the holy Malshree Dhun awaken divine peace, health, and fearless courage in every household!',
+    mediaType: 'video',
+    mediaUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    mediaAlt: FESTIVE_ARTWORKS.dashain_tika,
+    timestamp: 'Just now',
+    likesCount: 348,
+    viewsCount: 1940,
+    isFeatured: true,
+    isApproved: true,
+    comments: [
+      {
+        id: 'c-v1',
+        userName: 'Sushil Giri (Platform Manager)',
+        country: '🇳🇵 Nepal',
+        text: 'The soul of Dashain is right here in this Malshree Dhun! Jai Durga Mata to our entire global Nepali family.',
+        timestamp: 'Just now'
+      },
+      {
+        id: 'c-v2',
+        userName: 'Kiran Thapa',
+        country: '🇬🇧 UK',
+        text: 'Hearing this Malshree tune from London brings tears to my eyes. Pure nostalgia!',
+        timestamp: '15 mins ago'
+      }
+    ]
+  },
+  {
+    id: 'post-vid-2',
+    userName: 'Pooja Shrestha & Youth Mandal',
+    familyName: 'Shrestha Cultural Club',
+    country: 'Nepal',
+    countryCode: '🇳🇵',
+    city: 'Pokhara (Lakeside)',
+    category: 'deusi_bhailo',
+    title: 'Aha Bhana Mera Bhaiho Deusi Re! Live Dance & Madal in Pokhara',
+    story: 'Watch our youth club dancing down the illuminated streets of Lakeside Pokhara singing authentic Deusi-Bhailo tunes with handmade wooden Madal and brass cymbals. The sound of our traditional beats echoes against the Annapurna mountains!',
+    blessings: 'Hariyo gobar le lipeko, Laxmi Puja ko din ma... May endless joy and prosperity visit your doorstep this Tihar!',
+    mediaType: 'video',
+    mediaUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    mediaAlt: FESTIVE_ARTWORKS.diaspora_gathering,
+    timestamp: '1 hour ago',
+    likesCount: 295,
+    viewsCount: 1480,
+    isFeatured: true,
+    isApproved: true,
+    comments: [
+      {
+        id: 'c-v3',
+        userName: 'Anjali Sharma',
+        country: '🇦🇺 Australia',
+        text: 'Bhaileni aain aagana! Absolutely loving the energy and the Madal rhythm from Pokhara.',
+        timestamp: '30 mins ago'
+      }
+    ]
+  },
+  {
+    id: 'post-vid-3',
+    userName: 'Prabin & Anjali Giri',
+    familyName: 'Giri Parivar',
+    country: 'United States',
+    countryCode: '🇺🇸',
+    city: 'Dallas, Texas',
+    category: 'tihar_lights',
+    title: 'Lighting 108 Sacred Oil Diyas & 6-Foot Floral Rangoli Timelapse',
+    story: 'Watch the hypnotic visual progression of lighting 108 traditional mustard oil diyas across our Dallas patio, accompanied by sacred bells and festive melodies. Distance dissolves when our hearts shine in devotion to Mata Laxmi.',
+    blessings: 'Wishing wealth of happiness, good health, and sparkling prosperity to every home across the globe on this auspicious Tihar!',
+    mediaType: 'video',
+    mediaUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+    mediaAlt: FESTIVE_ARTWORKS.tihar_lights,
+    timestamp: '3 hours ago',
+    likesCount: 265,
+    viewsCount: 1220,
+    isFeatured: true,
+    isApproved: true,
+    comments: [
+      {
+        id: 'c-v4',
+        userName: 'Deepak Adhikari',
+        country: '🇨🇦 Canada',
+        text: 'The diya lighting with the background sitar music is so calming. Happy Deepawali!',
+        timestamp: '1 hour ago'
+      }
+    ]
+  },
+  {
     id: 'post-1',
     userName: 'Aarav & Sunita Sharma',
     familyName: 'Sharma Niwas',
