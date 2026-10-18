@@ -1,9 +1,12 @@
 import React from 'react';
-import { Sparkles, Heart, Globe2, Share2, Flame, MapPin } from 'lucide-react';
+import { Sparkles, Flame, MapPin } from 'lucide-react';
 import { FESTIVE_ARTWORKS } from '../utils/festiveArtworks';
 import { AdminAnnouncement } from '../types';
+import { Translations, Language } from '../i18n/translations';
 
 interface FestiveHeroProps {
+  t: Translations;
+  language: Language;
   totalPosts: number;
   uniqueCountries: number;
   totalLikes: number;
@@ -13,6 +16,8 @@ interface FestiveHeroProps {
 }
 
 export const FestiveHero: React.FC<FestiveHeroProps> = ({
+  t,
+  language,
   totalPosts,
   uniqueCountries,
   totalLikes,
@@ -40,7 +45,7 @@ export const FestiveHero: React.FC<FestiveHeroProps> = ({
                   <h4 className="text-sm font-bold text-amber-950 dark:text-amber-200">
                     {announcement.title}
                   </h4>
-                  <span className="text-xs text-amber-800/70 dark:text-amber-400">· Official Notice</span>
+                  <span className="text-xs text-amber-800/70 dark:text-amber-400">· {t.heroOfficialNotice}</span>
                 </div>
                 <p className="mt-0.5 text-xs sm:text-sm text-stone-700 dark:text-stone-300">
                   {announcement.content}
@@ -59,17 +64,15 @@ export const FestiveHero: React.FC<FestiveHeroProps> = ({
             {/* Kicker / Subtitle */}
             <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-amber-800 dark:text-amber-400 mb-3">
               <span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
-              <span>Bada Dashain & Tihar (Deepawali) Celebration</span>
-              <span className="text-stone-300 dark:text-stone-700">·</span>
-              <span>Nepal & Global Diaspora</span>
+              <span>{t.heroKicker}</span>
             </div>
 
             <h1 className="font-['Playfair_Display',Georgia,serif] text-3xl font-extrabold tracking-tight text-stone-900 sm:text-4xl lg:text-5xl dark:text-stone-50 leading-[1.18] text-balance">
-              Where Nepali Hearts Unite Across the Globe
+              {t.heroTitle}
             </h1>
 
             <p className="mt-4 text-base sm:text-lg leading-relaxed text-stone-600 dark:text-stone-300 max-w-2xl">
-              From the terraced green hills of Nepal to vibrant diaspora homes worldwide. Share your family's golden Jamara, scarlet Vijaya Dashami Tika, glowing Tihar diyas, and authentic cultural blessings.
+              {t.heroDesc}
             </p>
 
             {/* CTAs */}
@@ -77,41 +80,41 @@ export const FestiveHero: React.FC<FestiveHeroProps> = ({
               <button
                 type="button"
                 onClick={onOpenSubmit}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 via-amber-600 to-amber-500 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all hover:brightness-105 hover:shadow-lg active:scale-98"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 via-amber-600 to-amber-500 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all hover:brightness-105 hover:shadow-lg active:scale-98 cursor-pointer"
               >
                 <Sparkles className="h-4 w-4" />
-                <span>Share Your Family Story</span>
+                <span>{t.heroShareBtn}</span>
               </button>
 
               <button
                 type="button"
                 onClick={onTriggerConfetti}
-                className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50/70 px-4 py-3 text-sm font-medium text-amber-900 transition-colors hover:bg-amber-100 dark:border-amber-800/80 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-950/70"
+                className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50/70 px-4 py-3 text-sm font-medium text-amber-900 transition-colors hover:bg-amber-100 dark:border-amber-800/80 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-950/70 cursor-pointer"
               >
                 <span>🌸</span>
-                <span>Send Sayapatri Shower</span>
+                <span>{t.heroFlowerBtn}</span>
               </button>
 
               <a
                 href="#feed-section"
                 className="inline-flex items-center gap-2 px-3 py-3 text-sm font-medium text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 transition-colors"
               >
-                <span>Explore Global Wall</span>
+                <span>{t.heroExploreWallBtn}</span>
                 <span>↓</span>
               </a>
             </div>
 
             {/* Managed by Sushil Giri Attribution & Real-time Cloud Status */}
             <div className="mt-6 pt-5 border-t border-amber-900/10 dark:border-stone-800 flex flex-wrap items-center gap-2 text-xs text-stone-500 dark:text-stone-400">
-              <span className="font-semibold text-stone-900 dark:text-stone-100">Platform Managed by Sushil Giri</span>
+              <span className="font-semibold text-stone-900 dark:text-stone-100">{t.heroManagedBy}</span>
               <span>·</span>
-              <a href="https://wa.me/9779860228005" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors">
+              <a href="https://wa.me/9779860228005" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors font-medium">
                 WhatsApp: +977 9860228005
               </a>
               <span>·</span>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100/90 dark:bg-emerald-950/80 px-2.5 py-0.5 text-[11px] font-medium text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Global Cloud Backend: Real-Time Synced for All Visitors</span>
+                <span>{t.heroCloudStatus}</span>
               </span>
             </div>
 
@@ -139,29 +142,29 @@ export const FestiveHero: React.FC<FestiveHeroProps> = ({
                     <div className="flex items-center justify-between text-xs text-amber-300 mb-1">
                       <span className="flex items-center gap-1 font-medium">
                         <MapPin className="h-3.5 w-3.5" />
-                        Nepal Himalayas & Hillside Villages
+                        {language === 'ne' ? 'नेपाल हिमाल तथा डाँडाकाँडा' : 'Nepal Himalayas & Hillside Villages'}
                       </span>
-                      <span className="font-mono text-amber-200">Linge Ping & Sayapatri</span>
+                      <span className="font-mono text-amber-200">{language === 'ne' ? 'लिङ्गे पिङ र सयपत्री' : 'Linge Ping & Sayapatri'}</span>
                     </div>
                     <p className="font-['Playfair_Display',Georgia,serif] text-base sm:text-lg font-bold leading-tight">
-                      "Once a year, touch the sky and renew the spirit."
+                      {t.heroVillageQuote}
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* Floating Diya Card Overlay */}
-              <div className="absolute -bottom-5 -left-4 sm:-left-6 rounded-xl border border-amber-300 bg-white/95 p-3 shadow-xl backdrop-blur-md dark:border-amber-800 dark:bg-stone-900/95 max-w-[210px]">
+              <div className="absolute -bottom-5 -left-4 sm:-left-6 rounded-xl border border-amber-300 bg-white/95 p-3 shadow-xl backdrop-blur-md dark:border-amber-800 dark:bg-stone-900/95 max-w-[220px]">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400">
                     <Flame className="h-5 w-5 fill-amber-500 text-amber-600" />
                   </div>
                   <div>
                     <div className="text-xs font-bold text-stone-900 dark:text-stone-100">
-                      Tihar Lights
+                      {t.heroTiharLightsBadge}
                     </div>
                     <div className="text-[11px] text-stone-500 dark:text-stone-400 leading-tight">
-                      108 sacred oil diyas glowing
+                      {t.heroTiharLightsDesc}
                     </div>
                   </div>
                 </div>
@@ -179,7 +182,7 @@ export const FestiveHero: React.FC<FestiveHeroProps> = ({
               {totalPosts}
             </div>
             <div className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-0.5">
-              Global Stories Shared
+              {t.statStories}
             </div>
           </div>
 
@@ -188,7 +191,7 @@ export const FestiveHero: React.FC<FestiveHeroProps> = ({
               {uniqueCountries}
             </div>
             <div className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-0.5">
-              Countries Represented
+              {t.statCountries}
             </div>
           </div>
 
@@ -197,7 +200,7 @@ export const FestiveHero: React.FC<FestiveHeroProps> = ({
               {totalLikes.toLocaleString()}
             </div>
             <div className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-0.5">
-              Blessings & Hearts (❤️)
+              {t.statBlessings}
             </div>
           </div>
 
@@ -206,7 +209,7 @@ export const FestiveHero: React.FC<FestiveHeroProps> = ({
               100%
             </div>
             <div className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-0.5">
-              Worldwide Community Love
+              {t.statCommunityLove}
             </div>
           </div>
         </div>

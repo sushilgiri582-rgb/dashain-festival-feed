@@ -1,8 +1,12 @@
 import React from 'react';
 import { Moon, Sun, Volume2, VolumeX, ShieldCheck, Sparkles, PlusCircle } from 'lucide-react';
 import { festiveAudio } from '../utils/festiveAudio';
+import { Language, Translations } from '../i18n/translations';
 
 interface NavbarProps {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: Translations;
   darkMode: boolean;
   setDarkMode: (val: boolean) => void;
   petalsEnabled: boolean;
@@ -16,6 +20,9 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
+  language,
+  setLanguage,
+  t,
   darkMode,
   setDarkMode,
   petalsEnabled,
@@ -33,8 +40,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-amber-900/10 bg-white/90 backdrop-blur-md transition-colors duration-200 dark:border-stone-800 dark:bg-stone-950/90">
-      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between gap-8 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 border-b border-amber-900/10 bg-white/95 backdrop-blur-md transition-colors duration-200 dark:border-stone-800 dark:bg-stone-950/95">
+      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between gap-4 sm:gap-8 px-4 sm:px-6 lg:px-8">
         
         {/* Zone 1: Single text wordmark */}
         <a
@@ -44,45 +51,81 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-600 to-red-600 text-base text-white shadow-sm">
             🪔
           </span>
-          <span className="font-['Playfair_Display',Georgia,serif] text-xl font-bold tracking-normal text-stone-900 dark:text-stone-50">
-            Mero Dashain & Tihar
+          <span className="font-['Playfair_Display',Georgia,serif] text-base sm:text-lg lg:text-xl font-bold tracking-normal text-stone-900 dark:text-stone-50">
+            {t.brandName}{' '}
+            <span className="text-amber-600 dark:text-amber-400 font-sans font-semibold text-xs sm:text-sm">
+              {t.brandSubtitle}
+            </span>
           </span>
         </a>
 
         {/* Zone 2: 4-5 single-line nav links */}
-        <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-stone-600 dark:text-stone-300">
+        <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-stone-600 dark:text-stone-300">
           <a
             href="#feed-section"
             className="whitespace-nowrap transition-colors hover:text-amber-600 dark:hover:text-amber-400"
           >
-            Community Feed
+            {t.navFeed}
           </a>
           <a
             href="#traditions-section"
             className="whitespace-nowrap transition-colors hover:text-amber-600 dark:hover:text-amber-400"
           >
-            Festival Calendar
+            {t.navTraditions}
           </a>
           <a
             href="#creator-section"
             className="whitespace-nowrap transition-colors hover:text-amber-600 dark:hover:text-amber-400"
           >
-            Creator Profile
+            {t.navCreator}
           </a>
           <button
             type="button"
             onClick={onTriggerConfetti}
-            className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400 font-semibold cursor-pointer hover:opacity-80 transition-opacity"
-            title="Shower Sayapatri petals"
+            className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400 font-semibold cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap shrink-0"
+            title={t.navBlessingsShower}
           >
             <Sparkles className="h-3.5 w-3.5" />
-            <span>Blessings Shower</span>
+            <span>{t.navBlessingsShower}</span>
           </button>
         </nav>
 
-        {/* Zone 3: Interactive controls & 1 primary action */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {/* Zone 3: Interactive controls, Language Switcher & Primary Action */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           
+          {/* Prominent Language Switcher Toggle */}
+          <div className="flex items-center rounded-lg border border-amber-300/80 bg-amber-50/70 p-0.5 text-xs dark:border-stone-700 dark:bg-stone-900 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setLanguage('ne')}
+              className={`flex items-center gap-1 rounded-md px-2 py-1 font-semibold transition-all ${
+                language === 'ne'
+                  ? 'bg-amber-600 text-white shadow-xs font-bold'
+                  : 'text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100'
+              }`}
+              title="नेपाली भाषा रोज्नुहोस्"
+              aria-label="नेपाली भाषा"
+            >
+              <span>🇳🇵</span>
+              <span className="font-['Mukta',sans-serif] text-[13px] font-bold">नेपाली</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setLanguage('en')}
+              className={`flex items-center gap-1 rounded-md px-2 py-1 font-semibold transition-all ${
+                language === 'en'
+                  ? 'bg-amber-600 text-white shadow-xs font-bold'
+                  : 'text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100'
+              }`}
+              title="Switch to English"
+              aria-label="English Language"
+            >
+              <span>🇬🇧</span>
+              <span>English</span>
+            </button>
+          </div>
+
           {/* Ambient Festival Audio Synthesizer */}
           <button
             type="button"
@@ -92,7 +135,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 ? 'border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700'
                 : 'border-stone-200 bg-transparent text-stone-500 hover:text-stone-900 dark:border-stone-800 dark:text-stone-400 dark:hover:text-stone-100'
             }`}
-            title={audioPlaying ? 'Mute ambient chimes' : 'Play peaceful festive chimes'}
+            title={audioPlaying ? t.navMuteAudio : t.navPlayAudio}
             aria-label="Toggle ambient chimes"
           >
             {audioPlaying ? <Volume2 className="h-4 w-4 animate-pulse" /> : <VolumeX className="h-4 w-4" />}
@@ -110,7 +153,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             title="Toggle floating marigold petals"
           >
             <span>🌸</span>
-            <span>{petalsEnabled ? 'Petals On' : 'Petals Off'}</span>
+            <span>{petalsEnabled ? t.navPetalsOn : t.navPetalsOff}</span>
           </button>
 
           {/* Dark Mode Toggle */}
@@ -118,7 +161,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             type="button"
             onClick={() => setDarkMode(!darkMode)}
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-600 transition-colors hover:bg-stone-100 dark:border-stone-800 dark:text-stone-300 dark:hover:bg-stone-900"
-            title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            title={darkMode ? t.navLightMode : t.navDarkMode}
             aria-label="Toggle Dark Mode"
           >
             {darkMode ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-stone-700" />}
@@ -133,7 +176,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300'
                 : 'border-stone-200 text-stone-500 hover:text-amber-700 dark:border-stone-800 dark:text-stone-400 dark:hover:text-amber-400'
             }`}
-            title="Creator & Admin Dashboard (Sushil Giri)"
+            title={t.navAdminPortal}
             aria-label="Open Admin Dashboard"
           >
             <ShieldCheck className="h-4 w-4" />
@@ -143,10 +186,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={onOpenSubmit}
-            className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-red-600 to-amber-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:from-red-700 hover:to-amber-700 hover:shadow active:scale-95 whitespace-nowrap shrink-0 sm:text-sm"
+            className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-red-600 to-amber-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:from-red-700 hover:to-amber-700 hover:shadow active:scale-95 whitespace-nowrap shrink-0 sm:text-sm cursor-pointer"
           >
             <PlusCircle className="h-4 w-4" />
-            <span>Share Story</span>
+            <span>{t.navShareStory}</span>
           </button>
         </div>
 

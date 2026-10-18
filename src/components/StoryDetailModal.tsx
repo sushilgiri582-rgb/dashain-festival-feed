@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Heart, MessageCircle, Share2, MapPin, Send, Check } from 'lucide-react';
 import { Post } from '../types';
+import { Translations, Language } from '../i18n/translations';
 
 interface StoryDetailModalProps {
   post: Post | null;
@@ -9,6 +10,8 @@ interface StoryDetailModalProps {
   onToggleLike: (postId: string) => void;
   onAddComment: (postId: string, userName: string, country: string, text: string) => void;
   onTriggerConfetti: () => void;
+  t: Translations;
+  language: Language;
 }
 
 export const StoryDetailModal: React.FC<StoryDetailModalProps> = ({
@@ -18,11 +21,17 @@ export const StoryDetailModal: React.FC<StoryDetailModalProps> = ({
   onToggleLike,
   onAddComment,
   onTriggerConfetti,
+  t,
+  language,
 }) => {
   const [commentName, setCommentName] = useState('');
-  const [commentCountry, setCommentCountry] = useState('🇳🇵 Nepal');
+  const [commentCountry, setCommentCountry] = useState(language === 'ne' ? '🇳🇵 नेपाल' : '🇳🇵 Nepal');
   const [commentText, setCommentText] = useState('');
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setCommentCountry(language === 'ne' ? '🇳🇵 नेपाल' : '🇳🇵 Nepal');
+  }, [language]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -81,7 +90,7 @@ export const StoryDetailModal: React.FC<StoryDetailModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-200"
+            className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-200 cursor-pointer"
             aria-label="Close dialog"
           >
             <X className="h-5 w-5" />
@@ -107,7 +116,7 @@ export const StoryDetailModal: React.FC<StoryDetailModalProps> = ({
           </h2>
 
           {/* Story Narrative */}
-          <div className="mt-4 text-base leading-relaxed text-stone-700 dark:text-stone-200 whitespace-pre-line">
+          <div className="mt-4 text-base leading-relaxed text-stone-700 dark:text-stone-200 whitespace-pre-line font-['Mukta',sans-serif]">
             {post.story}
           </div>
 
@@ -118,7 +127,7 @@ export const StoryDetailModal: React.FC<StoryDetailModalProps> = ({
                 <span className="text-xl">🪔</span>
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-wider text-amber-900 dark:text-amber-400">
-                    Family Festival Blessings (Ashirwad)
+                    {t.detailFamilyBlessingsTitle}
                   </div>
                   <p className="mt-1 text-sm italic font-medium text-amber-950 dark:text-amber-200">
                     "{post.blessings}"
@@ -137,28 +146,28 @@ export const StoryDetailModal: React.FC<StoryDetailModalProps> = ({
                   onToggleLike(post.id);
                   if (!isLiked) onTriggerConfetti();
                 }}
-                className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
+                className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors cursor-pointer ${
                   isLiked
                     ? 'bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400'
                     : 'text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800'
                 }`}
               >
                 <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-600' : ''}`} />
-                <span className="font-mono tabular-nums">{post.likesCount} Hearts</span>
+                <span className="font-mono tabular-nums">{post.likesCount} {t.detailHearts}</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleShare}
-                className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 transition-colors"
+                className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800 transition-colors cursor-pointer"
               >
                 {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Share2 className="h-4 w-4" />}
-                <span>{copied ? 'Link Copied!' : 'Share Story'}</span>
+                <span>{copied ? t.detailLinkCopied : t.detailShareStory}</span>
               </button>
             </div>
 
             <div className="text-xs text-stone-400 font-mono tabular-nums">
-              {post.viewsCount} views
+              {post.viewsCount} {t.detailViews}
             </div>
           </div>
 
@@ -166,14 +175,14 @@ export const StoryDetailModal: React.FC<StoryDetailModalProps> = ({
           <div className="mt-8">
             <h3 className="font-['Playfair_Display',Georgia,serif] text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
               <MessageCircle className="h-5 w-5 text-amber-600" />
-              <span>Community Blessings ({post.comments.length})</span>
+              <span>{t.detailBlessingsHeading} ({post.comments.length})</span>
             </h3>
 
             {/* Existing Comments List */}
             <div className="mt-4 space-y-3">
               {post.comments.length === 0 ? (
                 <p className="text-sm italic text-stone-500 dark:text-stone-400 py-3">
-                  Be the first to send festival blessings to {post.userName}!
+                  {t.detailFirstToBless} {post.userName}!
                 </p>
               ) : (
                 post.comments.map((c) => (
@@ -196,7 +205,7 @@ export const StoryDetailModal: React.FC<StoryDetailModalProps> = ({
             {/* Leave a Blessing Form */}
             <form onSubmit={handleSubmitComment} className="mt-5 rounded-xl border border-stone-200 bg-stone-50 p-4 dark:border-stone-800 dark:bg-stone-800/60">
               <div className="text-xs font-semibold uppercase tracking-wider text-stone-600 dark:text-stone-400 mb-3">
-                Send Your Shubhakamana / Blessing
+                {t.detailSendBlessingHeader}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
@@ -204,7 +213,7 @@ export const StoryDetailModal: React.FC<StoryDetailModalProps> = ({
                   <input
                     type="text"
                     required
-                    placeholder="Your Name (e.g. Ramesh Giri)"
+                    placeholder={t.detailNamePlaceholder}
                     value={commentName}
                     onChange={(e) => setCommentName(e.target.value)}
                     className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs text-stone-900 focus:border-amber-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
@@ -213,7 +222,7 @@ export const StoryDetailModal: React.FC<StoryDetailModalProps> = ({
                 <div>
                   <input
                     type="text"
-                    placeholder="Your Location (e.g. 🇳🇵 Nepal or 🇬🇧 London)"
+                    placeholder={t.detailLocationPlaceholder}
                     value={commentCountry}
                     onChange={(e) => setCommentCountry(e.target.value)}
                     className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs text-stone-900 focus:border-amber-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
@@ -225,17 +234,17 @@ export const StoryDetailModal: React.FC<StoryDetailModalProps> = ({
                 <input
                   type="text"
                   required
-                  placeholder="Type your festival wish or blessings..."
+                  placeholder={t.detailMessagePlaceholder}
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   className="flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs text-stone-900 focus:border-amber-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
                 />
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700 transition-colors shrink-0"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700 transition-colors shrink-0 cursor-pointer"
                 >
                   <Send className="h-3.5 w-3.5" />
-                  <span>Bless</span>
+                  <span>{t.detailBlessBtn}</span>
                 </button>
               </div>
             </form>

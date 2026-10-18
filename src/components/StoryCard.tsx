@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Share2, MapPin, Check, Bookmark } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Check } from 'lucide-react';
 import { Post } from '../types';
+import { Translations, Language, CATEGORY_NAMES_NEPALI } from '../i18n/translations';
 
 interface StoryCardProps {
   post: Post;
@@ -8,9 +9,11 @@ interface StoryCardProps {
   onToggleLike: (postId: string) => void;
   onOpenDetail: (post: Post) => void;
   onTriggerConfetti: () => void;
+  t: Translations;
+  language: Language;
 }
 
-const CATEGORY_NAMES: Record<string, string> = {
+const CATEGORY_NAMES_ENGLISH: Record<string, string> = {
   dashain_tika: 'Vijaya Dashami Tika',
   tihar_lights: 'Tihar & Laxmi Puja',
   bhai_tika: 'Sacred Bhai Tika',
@@ -25,6 +28,8 @@ export const StoryCard: React.FC<StoryCardProps> = ({
   onToggleLike,
   onOpenDetail,
   onTriggerConfetti,
+  t,
+  language,
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -47,6 +52,11 @@ export const StoryCard: React.FC<StoryCardProps> = ({
     }
   };
 
+  const categoryLabel =
+    language === 'ne'
+      ? CATEGORY_NAMES_NEPALI[post.category] || post.category
+      : CATEGORY_NAMES_ENGLISH[post.category] || post.category;
+
   return (
     <article
       onClick={() => onOpenDetail(post)}
@@ -63,7 +73,6 @@ export const StoryCard: React.FC<StoryCardProps> = ({
             loading="lazy"
             referrerPolicy="no-referrer"
             onError={(e) => {
-              // Graceful SVG fallback in case of broken custom upload
               const target = e.currentTarget;
               target.onerror = null;
               target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250"><rect width="400" height="250" fill="%2378350f"/><text x="200" y="130" font-family="sans-serif" font-size="20" fill="%23fef08a" text-anchor="middle">🪔 Festive Celebration</text></svg>';
@@ -81,14 +90,14 @@ export const StoryCard: React.FC<StoryCardProps> = ({
 
           {/* Festival type on bottom-left */}
           <div className="absolute bottom-3 left-3 text-xs font-semibold text-amber-200 drop-shadow-sm">
-            {CATEGORY_NAMES[post.category] || 'Festival Moment'}
+            {categoryLabel}
           </div>
         </div>
 
         {/* Card Body */}
         <div className="p-5">
           
-          {/* Metadata Discipline: Clean unboxed metadata with dot separators */}
+          {/* Metadata: Clean unboxed text with dot separators */}
           <div className="flex items-center flex-wrap gap-1.5 text-xs text-stone-500 dark:text-stone-400 mb-2">
             <span className="font-semibold text-stone-800 dark:text-stone-200">
               {post.userName}
@@ -130,7 +139,7 @@ export const StoryCard: React.FC<StoryCardProps> = ({
               ? 'text-red-600 font-bold dark:text-red-400'
               : 'text-stone-500 hover:text-red-600 dark:text-stone-400 dark:hover:text-red-400'
           }`}
-          title={isLiked ? 'Unlike this story' : 'Send heart / blessing'}
+          title={isLiked ? t.cardUnlike : t.cardSendHeart}
         >
           <Heart
             className={`h-4 w-4 transition-transform ${
@@ -148,7 +157,7 @@ export const StoryCard: React.FC<StoryCardProps> = ({
         >
           <MessageCircle className="h-4 w-4" />
           <span className="font-mono tabular-nums">{post.comments.length}</span>
-          <span className="hidden sm:inline">blessings</span>
+          <span className="hidden sm:inline">{t.cardBlessings}</span>
         </button>
 
         {/* Share Button */}
@@ -156,17 +165,17 @@ export const StoryCard: React.FC<StoryCardProps> = ({
           type="button"
           onClick={handleShare}
           className="flex items-center gap-1 text-xs text-stone-400 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-200 transition-colors"
-          title="Copy link to this story"
+          title={t.cardShare}
         >
           {copied ? (
             <>
               <Check className="h-3.5 w-3.5 text-emerald-600" />
-              <span className="text-emerald-600 font-medium">Copied</span>
+              <span className="text-emerald-600 font-medium">{t.cardCopied}</span>
             </>
           ) : (
             <>
               <Share2 className="h-3.5 w-3.5" />
-              <span>Share</span>
+              <span>{t.cardShare}</span>
             </>
           )}
         </button>

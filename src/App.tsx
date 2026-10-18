@@ -17,6 +17,7 @@ import { Footer } from './components/Footer';
 import { StoryDetailModal } from './components/StoryDetailModal';
 import { SubmissionModal } from './components/SubmissionModal';
 import { AdminDashboard } from './components/AdminDashboard';
+import { Language, translations } from './i18n/translations';
 import {
   seedInitialPostsIfEmpty,
   subscribeToGlobalPosts,
@@ -36,9 +37,24 @@ const STORAGE_KEYS = {
   LIKES: 'mero_dashain_likes_v1',
   THEME: 'mero_dashain_theme_v1',
   PETALS: 'mero_dashain_petals_v1',
+  LANG: 'mero_dashain_lang_v1',
 };
 
 export default function App() {
+  // Language State: 'ne' (Nepali) by default or user preference
+  const [language, setLanguage] = useState<Language>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.LANG);
+    return saved === 'en' || saved === 'ne' ? saved : 'ne';
+  });
+
+  const t = translations[language];
+
+  // Sync Language preference & document lang
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.LANG, language);
+    document.documentElement.lang = language === 'ne' ? 'ne' : 'en';
+  }, [language]);
+
   // Theme State
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.THEME);
@@ -288,8 +304,11 @@ export default function App() {
       {/* Background Floating Petals Canvas */}
       <PetalCanvas enabled={petalsEnabled} />
 
-      {/* Top Bar Navigation */}
+      {/* Top Bar Navigation with Language Switcher */}
       <Navbar
+        language={language}
+        setLanguage={setLanguage}
+        t={t}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
         petalsEnabled={petalsEnabled}
@@ -307,6 +326,8 @@ export default function App() {
         
         {/* Festive Hero Section */}
         <FestiveHero
+          t={t}
+          language={language}
           totalPosts={posts.length}
           uniqueCountries={new Set(posts.map((p) => p.country)).size}
           totalLikes={posts.reduce((acc, p) => acc + p.likesCount, 0)}
@@ -323,13 +344,15 @@ export default function App() {
           onOpenDetail={handleOpenDetail}
           onOpenSubmit={() => setIsSubmitOpen(true)}
           onTriggerConfetti={triggerConfetti}
+          t={t}
+          language={language}
         />
 
         {/* Dashain & Tihar Living Traditions Guide */}
-        <TraditionsGuide />
+        <TraditionsGuide t={t} language={language} />
 
         {/* Creator & Contact Profile Section */}
-        <CreatorProfile onOpenAdmin={() => setIsAdminOpen(true)} />
+        <CreatorProfile onOpenAdmin={() => setIsAdminOpen(true)} t={t} language={language} />
 
       </main>
 
@@ -337,6 +360,8 @@ export default function App() {
       <Footer
         onOpenAdmin={() => setIsAdminOpen(true)}
         onTriggerConfetti={triggerConfetti}
+        t={t}
+        language={language}
       />
 
       {/* Story Detail & Blessings Modal */}
@@ -347,6 +372,8 @@ export default function App() {
         onToggleLike={handleToggleLike}
         onAddComment={handleAddComment}
         onTriggerConfetti={triggerConfetti}
+        t={t}
+        language={language}
       />
 
       {/* Multi-step Public Submission Modal */}
@@ -355,6 +382,8 @@ export default function App() {
         onClose={() => setIsSubmitOpen(false)}
         onSubmitPost={handleSubmitPost}
         onTriggerConfetti={triggerConfetti}
+        t={t}
+        language={language}
       />
 
       {/* Secret Admin Dashboard for Sushil Giri */}
@@ -372,6 +401,8 @@ export default function App() {
         onDeletePost={handleDeletePost}
         onUpdateAnnouncement={handleUpdateAnnouncement}
         onResetSeedData={handleResetSeedData}
+        t={t}
+        language={language}
       />
 
     </div>

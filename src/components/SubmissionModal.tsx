@@ -4,21 +4,24 @@ import { Post, FestivalCategory } from '../types';
 import { COUNTRIES_LIST } from '../data/seedData';
 import { FESTIVE_ARTWORKS } from '../utils/festiveArtworks';
 import { compressImageFile } from '../utils/imageCompressor';
+import { Translations, Language, CATEGORY_NAMES_NEPALI } from '../i18n/translations';
 
 interface SubmissionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmitPost: (newPost: Omit<Post, 'id' | 'timestamp' | 'likesCount' | 'viewsCount' | 'comments' | 'isApproved'>) => Promise<void> | void;
   onTriggerConfetti: () => void;
+  t: Translations;
+  language: Language;
 }
 
-const CATEGORIES: { id: FestivalCategory; label: string; icon: string; defaultArt: string }[] = [
-  { id: 'dashain_tika', label: 'Dashain Tika & Jamara', icon: '🌾', defaultArt: FESTIVE_ARTWORKS.dashain_tika },
-  { id: 'tihar_lights', label: 'Tihar & Laxmi Puja (Lights)', icon: '🪔', defaultArt: FESTIVE_ARTWORKS.tihar_lights },
-  { id: 'bhai_tika', label: 'Sacred Bhai Tika', icon: '🌈', defaultArt: FESTIVE_ARTWORKS.bhai_tika },
-  { id: 'deusi_bhailo', label: 'Deusi Bhailo Celebration', icon: '🪕', defaultArt: FESTIVE_ARTWORKS.diaspora_gathering },
-  { id: 'jamara_ghatasthapana', label: 'Ghatasthapana & Jamara', icon: '🌱', defaultArt: FESTIVE_ARTWORKS.dashain_tika },
-  { id: 'diaspora_gathering', label: 'Global Diaspora Family Feast', icon: '🌍', defaultArt: FESTIVE_ARTWORKS.diaspora_gathering },
+const CATEGORY_DEFINITIONS: { id: FestivalCategory; enLabel: string; icon: string; defaultArt: string }[] = [
+  { id: 'dashain_tika', enLabel: 'Dashain Tika & Jamara', icon: '🌾', defaultArt: FESTIVE_ARTWORKS.dashain_tika },
+  { id: 'tihar_lights', enLabel: 'Tihar & Laxmi Puja (Lights)', icon: '🪔', defaultArt: FESTIVE_ARTWORKS.tihar_lights },
+  { id: 'bhai_tika', enLabel: 'Sacred Bhai Tika', icon: '🌈', defaultArt: FESTIVE_ARTWORKS.bhai_tika },
+  { id: 'deusi_bhailo', enLabel: 'Deusi Bhailo Celebration', icon: '🪕', defaultArt: FESTIVE_ARTWORKS.diaspora_gathering },
+  { id: 'jamara_ghatasthapana', enLabel: 'Ghatasthapana & Jamara', icon: '🌱', defaultArt: FESTIVE_ARTWORKS.dashain_tika },
+  { id: 'diaspora_gathering', enLabel: 'Global Diaspora Family Feast', icon: '🌍', defaultArt: FESTIVE_ARTWORKS.diaspora_gathering },
 ];
 
 export const SubmissionModal: React.FC<SubmissionModalProps> = ({
@@ -26,6 +29,8 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
   onClose,
   onSubmitPost,
   onTriggerConfetti,
+  t,
+  language,
 }) => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,7 +72,6 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
 
     try {
       setIsCompressing(true);
-      // Automatically optimize camera images for cloud storage (< 100KB)
       const compressedDataUrl = await compressImageFile(file, 900, 900);
       setMediaUrl(compressedDataUrl);
       setCustomFileLoaded(true);
@@ -91,14 +95,14 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
     try {
       await onSubmitPost({
         userName: userName.trim(),
-        familyName: familyName.trim() || `${userName.trim()} Family`,
+        familyName: familyName.trim() || (language === 'ne' ? `${userName.trim()} परिवार` : `${userName.trim()} Family`),
         country,
         countryCode,
         city: city.trim(),
         category,
         title: title.trim(),
         story: story.trim(),
-        blessings: blessings.trim() || 'Wishing happiness, peace, and prosperity to everyone worldwide!',
+        blessings: blessings.trim() || (language === 'ne' ? 'सबैलाई सुख, शान्ति र समृद्धिको हार्दिक मंगलमय शुभकामना!' : 'Wishing happiness, peace, and prosperity to everyone worldwide!'),
         mediaType,
         mediaUrl,
         mediaAlt: title.trim(),
@@ -140,21 +144,21 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h2 className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-stone-900 dark:text-stone-50">
-                Share Your Dashain & Tihar Celebration
+                {t.submitModalTitle}
               </h2>
               <span className="hidden sm:inline-flex items-center gap-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
                 ☁️ Live Cloud Sync
               </span>
             </div>
             <div className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-              Step {step} of 4 · Saved instantly to Global Cloud Database for all worldwide visitors
+              {t.submitStepIndicator.replace('{step}', String(step))}
             </div>
           </div>
           <button
             type="button"
             disabled={isSubmitting}
             onClick={onClose}
-            className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-200 disabled:opacity-40"
+            className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-200 disabled:opacity-40 cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
@@ -176,21 +180,21 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
             <div className="space-y-4">
               <div>
                 <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm">
-                  1. Tell us who is celebrating
+                  {t.submitStep1Title}
                 </h3>
                 <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                  Your name and family house will appear proudly on the global community wall.
+                  {t.submitStep1Desc}
                 </p>
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1">
-                  Your Name / Submitter *
+                  {t.submitNameLabel}
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Sushil Giri or Aarav Sharma"
+                  placeholder={t.submitNamePlaceholder}
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
                   className="w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-sm text-stone-900 focus:border-amber-500 focus:outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100"
@@ -199,11 +203,11 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
 
               <div>
                 <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1">
-                  Family / House Name (Ghar / Parivar)
+                  {t.submitFamilyLabel}
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Giri Parivar or Sharma Niwas"
+                  placeholder={t.submitFamilyPlaceholder}
                   value={familyName}
                   onChange={(e) => setFamilyName(e.target.value)}
                   className="w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-sm text-stone-900 focus:border-amber-500 focus:outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100"
@@ -211,7 +215,7 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
               </div>
 
               <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 border border-amber-200 dark:border-amber-900/60">
-                ✨ Tip: Your post will be permanently saved to our shared cloud database and immediately visible to families across Nepal and worldwide.
+                {t.submitStep1Tip}
               </div>
             </div>
           )}
@@ -221,16 +225,16 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
             <div className="space-y-4">
               <div>
                 <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm">
-                  2. Where are you celebrating from?
+                  {t.submitStep2Title}
                 </h3>
                 <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                  Pin your festival lights to our global diaspora network.
+                  {t.submitStep2Desc}
                 </p>
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1">
-                  Country *
+                  {t.submitCountryLabel}
                 </label>
                 <select
                   value={country}
@@ -247,12 +251,12 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
 
               <div>
                 <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1">
-                  City / Town / Place *
+                  {t.submitCityLabel}
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Kathmandu, Pokhara, Dallas TX, London, or Sydney"
+                  placeholder={t.submitCityPlaceholder}
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   className="w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-sm text-stone-900 focus:border-amber-500 focus:outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100"
@@ -266,46 +270,49 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
             <div className="space-y-4">
               <div>
                 <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm">
-                  3. Festival Category & Celebration Photo/Video
+                  {t.submitStep3Title}
                 </h3>
                 <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                  Upload your photo/video or choose from our authentic cultural artworks.
+                  {t.submitStep3Desc}
                 </p>
               </div>
 
               {/* Festival Type Selector */}
               <div>
                 <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-2">
-                  Select Festival Tradition
+                  {t.submitTraditionLabel}
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {CATEGORIES.map((cat) => (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => {
-                        setCategory(cat.id);
-                        if (!customFileLoaded) {
-                          setMediaUrl(cat.defaultArt);
-                        }
-                      }}
-                      className={`flex items-center gap-2 rounded-lg border p-2.5 text-left text-xs transition-colors ${
-                        category === cat.id
-                          ? 'border-amber-500 bg-amber-50 text-amber-950 font-semibold dark:bg-amber-950/60 dark:text-amber-200 dark:border-amber-600'
-                          : 'border-stone-200 text-stone-700 hover:border-stone-300 dark:border-stone-800 dark:text-stone-300'
-                      }`}
-                    >
-                      <span>{cat.icon}</span>
-                      <span className="truncate">{cat.label}</span>
-                    </button>
-                  ))}
+                  {CATEGORY_DEFINITIONS.map((cat) => {
+                    const label = language === 'ne' ? CATEGORY_NAMES_NEPALI[cat.id] || cat.enLabel : cat.enLabel;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => {
+                          setCategory(cat.id);
+                          if (!customFileLoaded) {
+                            setMediaUrl(cat.defaultArt);
+                          }
+                        }}
+                        className={`flex items-center gap-2 rounded-lg border p-2.5 text-left text-xs transition-colors cursor-pointer ${
+                          category === cat.id
+                            ? 'border-amber-500 bg-amber-50 text-amber-950 font-semibold dark:bg-amber-950/60 dark:text-amber-200 dark:border-amber-600'
+                            : 'border-stone-200 text-stone-700 hover:border-stone-300 dark:border-stone-800 dark:text-stone-300'
+                        }`}
+                      >
+                        <span>{cat.icon}</span>
+                        <span className="truncate">{label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               {/* Photo Upload Zone */}
               <div>
                 <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">
-                  Upload Your Festival Media (Optimized for Instant Cloud Upload)
+                  {t.submitUploadLabel}
                 </label>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -314,17 +321,17 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
                       <div className="flex flex-col items-center">
                         <Loader2 className="h-6 w-6 text-amber-600 animate-spin mb-1" />
                         <span className="text-xs font-semibold text-stone-700 dark:text-stone-300">
-                          Optimizing image for cloud...
+                          {t.submitCompressing}
                         </span>
                       </div>
                     ) : (
                       <>
                         <Upload className="h-6 w-6 text-stone-400 group-hover:text-amber-600 mb-1" />
                         <span className="text-xs font-semibold text-stone-700 dark:text-stone-300">
-                          Click to Browse File
+                          {t.submitUploadClick}
                         </span>
                         <span className="text-[11px] text-stone-400 mt-0.5">
-                          Photos auto-compressed for lightning speed
+                          {t.submitUploadSubtext}
                         </span>
                       </>
                     )}
@@ -346,7 +353,7 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute bottom-1 right-1 rounded bg-black/70 px-2 py-0.5 text-[10px] text-white">
-                      {customFileLoaded ? 'Your Upload (Ready)' : 'Selected Artwork'}
+                      {customFileLoaded ? t.submitReadyUpload : t.submitSelectedArtwork}
                     </div>
                   </div>
                 </div>
@@ -354,7 +361,7 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
                 {/* Preset Art Alternatives */}
                 <div className="mt-3">
                   <span className="text-[11px] text-stone-500 dark:text-stone-400 block mb-1">
-                    Or select a festival illustration preset:
+                    {t.submitPresetAlternative}
                   </span>
                   <div className="flex items-center gap-2 overflow-x-auto pb-1">
                     {Object.entries(FESTIVE_ARTWORKS).map(([key, svgUrl]) => (
@@ -362,7 +369,7 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
                         key={key}
                         type="button"
                         onClick={() => handleSelectPresetArt(svgUrl)}
-                        className={`h-11 w-16 shrink-0 overflow-hidden rounded-md border transition-all ${
+                        className={`h-11 w-16 shrink-0 overflow-hidden rounded-md border transition-all cursor-pointer ${
                           mediaUrl === svgUrl
                             ? 'border-amber-500 ring-2 ring-amber-400'
                             : 'border-stone-300 opacity-70 hover:opacity-100 dark:border-stone-700'
@@ -383,21 +390,21 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
             <div className="space-y-4">
               <div>
                 <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm">
-                  4. Your Celebration Story & Auspicious Blessings
+                  {t.submitStep4Title}
                 </h3>
                 <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                  Pour your heart out—celebration rituals, food, memories, or wishes.
+                  {t.submitStep4Desc}
                 </p>
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1">
-                  Story Title *
+                  {t.submitTitleLabel}
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Gathering 4 Generations for Tika or 108 Diyas on our Patio"
+                  placeholder={t.submitTitlePlaceholder}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-sm text-stone-900 focus:border-amber-500 focus:outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100"
@@ -406,12 +413,12 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
 
               <div>
                 <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1">
-                  Your Story & Memories *
+                  {t.submitStoryLabel}
                 </label>
                 <textarea
                   required
                   rows={4}
-                  placeholder="Share how you are celebrating Dashain or Tihar this year. Talk about family elders, Sel Roti, Tika rituals, Deusi songs, or memories of Nepal..."
+                  placeholder={t.submitStoryPlaceholder}
                   value={story}
                   onChange={(e) => setStory(e.target.value)}
                   className="w-full rounded-lg border border-stone-300 bg-white p-3 text-sm text-stone-900 focus:border-amber-500 focus:outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100 leading-relaxed"
@@ -420,11 +427,11 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
 
               <div>
                 <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1">
-                  Festival Blessings / Shubhakamana to the World
+                  {t.submitBlessingsLabel}
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. May Durga Bhavani and Mata Laxmi shower prosperity upon all!"
+                  placeholder={t.submitBlessingsPlaceholder}
                   value={blessings}
                   onChange={(e) => setBlessings(e.target.value)}
                   className="w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2 text-sm text-stone-900 focus:border-amber-500 focus:outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100"
@@ -440,10 +447,10 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => setStep(step - 1)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800 disabled:opacity-40"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800 disabled:opacity-40 cursor-pointer"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
-                <span>Back</span>
+                <span>{t.submitBackBtn}</span>
               </button>
             ) : (
               <div />
@@ -458,9 +465,9 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
                   setStep(step + 1);
                 }}
                 disabled={(step === 1 && !userName.trim()) || (step === 2 && !city.trim())}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-5 py-2 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-40 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-5 py-2 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-40 transition-colors cursor-pointer"
               >
-                <span>Continue</span>
+                <span>{t.submitContinueBtn}</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
             ) : (
@@ -472,12 +479,12 @@ export const SubmissionModal: React.FC<SubmissionModalProps> = ({
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Saving to Global Database...</span>
+                    <span>{t.submitPublishingBtn}</span>
                   </>
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4" />
-                    <span>Publish Globally</span>
+                    <span>{t.submitPublishBtn}</span>
                   </>
                 )}
               </button>

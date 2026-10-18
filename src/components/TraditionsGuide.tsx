@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
-import { FESTIVAL_CALENDAR_INFO } from '../data/seedData';
-import { Sparkles, Calendar, HeartHandshake, Shield } from 'lucide-react';
+import { FESTIVAL_CALENDAR_INFO, FESTIVAL_CALENDAR_INFO_NEPALI } from '../data/seedData';
+import { Translations, Language } from '../i18n/translations';
 
-export const TraditionsGuide: React.FC = () => {
+interface TraditionsGuideProps {
+  t: Translations;
+  language: Language;
+}
+
+export const TraditionsGuide: React.FC<TraditionsGuideProps> = ({ t, language }) => {
   const [selectedFestival, setSelectedFestival] = useState<'dashain' | 'tihar'>('dashain');
 
-  const currentInfo = selectedFestival === 'dashain' ? FESTIVAL_CALENDAR_INFO[0] : FESTIVAL_CALENDAR_INFO[1];
+  const calendarData = language === 'ne' ? FESTIVAL_CALENDAR_INFO_NEPALI : FESTIVAL_CALENDAR_INFO;
+  const currentInfo = selectedFestival === 'dashain' ? calendarData[0] : calendarData[1];
 
   return (
     <section id="traditions-section" className="py-14 bg-amber-50/30 dark:bg-stone-900/40 border-t border-amber-900/10 dark:border-stone-800">
@@ -14,13 +20,13 @@ export const TraditionsGuide: React.FC = () => {
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-10">
           <div className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-1">
-            Living Heritage & Vedic Rituals
+            {t.traditionsKicker}
           </div>
           <h2 className="font-['Playfair_Display',Georgia,serif] text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-50">
-            Sacred Traditions of Dashain & Tihar
+            {t.traditionsTitle}
           </h2>
           <p className="mt-2 text-xs sm:text-sm text-stone-600 dark:text-stone-400">
-            Learn the deep spiritual symbolism and daily rituals preserved across centuries by Nepali families.
+            {t.traditionsDesc}
           </p>
 
           {/* Toggle between Dashain & Tihar */}
@@ -28,24 +34,24 @@ export const TraditionsGuide: React.FC = () => {
             <button
               type="button"
               onClick={() => setSelectedFestival('dashain')}
-              className={`px-5 py-2 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 selectedFestival === 'dashain'
                   ? 'bg-white text-stone-900 shadow-sm dark:bg-stone-900 dark:text-stone-50'
                   : 'text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100'
               }`}
             >
-              🌾 Bada Dashain (15 Days)
+              {t.traditionsDashainTab}
             </button>
             <button
               type="button"
               onClick={() => setSelectedFestival('tihar')}
-              className={`px-5 py-2 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 selectedFestival === 'tihar'
                   ? 'bg-white text-stone-900 shadow-sm dark:bg-stone-900 dark:text-stone-50'
                   : 'text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100'
               }`}
             >
-              🪔 Tihar & Deepawali (5 Days)
+              {t.traditionsTiharTab}
             </button>
           </div>
         </div>
@@ -58,8 +64,8 @@ export const TraditionsGuide: React.FC = () => {
               className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-xs transition-all hover:border-amber-400 hover:shadow-md dark:border-stone-800 dark:bg-stone-900"
             >
               <div className="flex items-center justify-between text-xs text-amber-700 dark:text-amber-400 font-medium mb-2">
-                <span>Phase {idx + 1}</span>
-                <span className="font-mono">Ritual Tradition</span>
+                <span>{t.traditionsPhase} {idx + 1}</span>
+                <span className="font-mono">{t.traditionsRitual}</span>
               </div>
               <h3 className="font-['Playfair_Display',Georgia,serif] text-base font-bold text-stone-900 dark:text-stone-100 mb-2">
                 {day.name}
@@ -78,10 +84,10 @@ export const TraditionsGuide: React.FC = () => {
               <span className="text-2xl">🌱</span>
               <div>
                 <h4 className="text-sm font-bold text-stone-900 dark:text-stone-100">
-                  Why is Jamara Sacred?
+                  {t.traditionsJamaraTitle}
                 </h4>
                 <p className="text-xs text-stone-600 dark:text-stone-300 mt-0.5">
-                  Sown on Ghatasthapana in pure sand and grown in darkness, the tender golden barley sprouts absorb Durga Bhavani's divine energy and bestow vitality.
+                  {t.traditionsJamaraDesc}
                 </p>
               </div>
             </div>
@@ -89,7 +95,7 @@ export const TraditionsGuide: React.FC = () => {
               href="#feed-section"
               className="text-xs font-semibold text-amber-800 dark:text-amber-400 hover:underline shrink-0"
             >
-              View Jamara Stories in Feed →
+              {t.traditionsJamaraLink}
             </a>
           </div>
         </div>
